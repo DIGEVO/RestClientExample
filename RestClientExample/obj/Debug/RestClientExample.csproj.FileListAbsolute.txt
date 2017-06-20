@@ -1,0 +1,8 @@
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\bin\Debug\RestClientExample.exe.config
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\bin\Debug\RestClientExample.exe
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\bin\Debug\RestClientExample.pdb
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\bin\Debug\Newtonsoft.Json.dll
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\bin\Debug\Newtonsoft.Json.xml
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\obj\Debug\RestClientExample.csprojResolveAssemblyReference.cache
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\obj\Debug\RestClientExample.exe
+C:\Users\rigo\Google Drive\JOB\Digevo\workspace\RestClientExample\RestClientExample\obj\Debug\RestClientExample.pdb
