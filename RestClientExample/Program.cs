@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -8,15 +9,35 @@ using System.Threading.Tasks;
 
 namespace RestClientExample
 {
+    class DataPoint
+    {
+        public DataPoint(DateTime Date, float Value) { this.Date = Date; this.Value = Value; }
+        public DateTime Date { get; set; }
+        public float Value { get; set; }
+
+        public override string ToString() { return $"{Date} {Value}"; }
+    }
+
     class Program
     {
+
         static void Main(string[] args)
         {
-            ProcessFinancialData().Wait();
+            //if (startDate > endDate) throw new ArgumentException("Start time need to be before end time!");
+
+            //var task = GetFinancialData(Indicators.dolar, DateTime.Parse("01-02-2017"), DateTime.Now);
+            //task.Wait();
+            //task.Result.ToList().ForEach(Console.WriteLine);
+
+            var task = GetFinancialData(Indicators.dolar, DateTime.Now);
+            task.Wait();
+            Console.WriteLine(task.Result);
+
             Console.ReadKey();
         }
 
-        enum Indicators {
+        enum Indicators
+        {
             uf                      //Unidad de fomento.
             , ivp                   //Indice de valor promedio.
             , dolar                 //Dólar observado.
@@ -30,21 +51,45 @@ namespace RestClientExample
             , tasa_desempleo        //Tasa de desempleo.
         }
 
-        private static async Task ProcessFinancialData()
+        private static async Task<DataPoint> GetFinancialData(Indicators indicator, DateTime date)
         {
             var client = new HttpClient();
-            var urlString = "http://www.mindicador.cl/api/{0}/{1}";
+            var url = $@"http://www.mindicador.cl/api/{indicator}/{date.ToString("dd-MM-yyyy")}";
+            var stringTask = client.GetStringAsync(url);
+            var stringData = await stringTask;
+            var token = JToken.Parse(stringData);
+            var jarraydata = token["serie"] ?? new JArray();
 
-            //var stringTask = client.GetStringAsync(String.Format(urlString, Indicators.dolar, DateTime.Now.ToString("dd-MM-yyyy")));
+            var result = new DataPoint(DateTime.MinValue, 0.0f);
 
-            var enumArray = Enum.GetValues(typeof(Indicators));
-            enumArray.GetValue(0);
-            var r = new Random();
-            
-            var stringTask = client.GetStringAsync($"http://www.mindicador.cl/api/{enumArray.GetValue(r.Next(enumArray.Length))}/{DateTime.Now.ToString("dd-MM-yyyy")}");
+            if (jarraydata.HasValues)
+            {
+                var data = jarraydata.ToArray()[0];
+                result.Date = data["fecha"].Value<DateTime>();
+                result.Value = data["valor"].Value<float>();
+            }
 
-            var msg = await stringTask;
-            Console.Write(msg);
+            return result;
+        }
+
+        private static async Task<IEnumerable<DataPoint>> GetFinancialData(Indicators indicator, DateTime startDate, DateTime endDate)
+        {
+            var client = new HttpClient();
+
+            var url = String.Format("http://www.mindicador.cl/api/{0}",
+                        startDate.Year == endDate.Year ?
+                            $@"{indicator}/{startDate.ToString("yyyy")}" :
+                            $"{indicator}");
+
+            var stringTask = client.GetStringAsync(url);
+            var stringData = await stringTask;
+            var token = JToken.Parse(stringData);
+            var jarraydata = token["serie"] ?? new JArray();
+
+            return jarraydata
+                .AsParallel()
+                .Select(ob => new DataPoint(ob["fecha"].Value<DateTime>(), ob["valor"].Value<float>()))
+                .Where(ob => ob.Date >= startDate && ob.Date <= endDate);
         }
     }
 }
